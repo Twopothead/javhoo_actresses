@@ -5,8 +5,8 @@ import re
 import json
 import sqlite3
 juncensored_dict ={
-'html_path':'/home/curie/0py/sample_uncensored.html',
-'sqlite3db_path':'/home/curie/uncensored.db'
+'html_path':'/home/curie/javhoo/javhoo/javhoo_uncensored_1317pages.html',
+'sqlite3db_path':'/home/curie/javhooDB.db'
 }
 class JavHoo_Uncensored():
     uncensored_total = 0
@@ -58,9 +58,11 @@ class JavHoo_Uncensored():
             sql_insert = sql_insert[:-1]
             try:
                 cursor.executemany(sql_insert,data)
+                # conn.commit()
                 print(av_index)
             except BaseException as e:
                 conn.rollback()
+                print(data)
                 print('except...', e)
             if(reach_total):
                 conn.commit()
@@ -84,7 +86,8 @@ class JavHoo_Uncensored():
     def get_ufanhao(self,article):
         return article.a['href'].replace('https://www.javhoo.com/av/','')
     def get_utitle(self,article):
-        return article.a['title']
+        # 417页的112614-744没有title,不能直接return article.a['title']
+        return article.a.get('title')
     def get_uImgurl(self,article):
         # return article.select('img[class="iso-lazy-load preload-me"]')[0]['data-src']
         result_list = article.select('img[class="iso-lazy-load preload-me"]')
@@ -112,7 +115,7 @@ class JavHoo_Uncensored():
         pass
     def drop_table(self):
         sql_drop = '''
-        drop table uncensored;
+        drop table if exists uncensored;
         '''
         try:
             conn = sqlite3.connect(self.dbpath)

@@ -5,9 +5,17 @@ import re
 import json
 import sqlite3
 jcensored_dict ={
-'html_path':'/home/curie/0py/sample_censored.html',
+'html_path':'/home/curie/javhoo/javhoo/javhoo_censored_4436.html',
 'sqlite3db_path':'/home/curie/censored.db'
 }
+# javhoo_censored_4436.html文件过大，内存放不下，需要拆分
+# wc -l javhoo_censored_4436.html 为13308，13308/3=4436行，拆成三个文件
+# 利用shell脚本对大文件进行分割 https://blog.csdn.net/suwei19870312/article/details/7352143
+# $ split -l 4436 javhoo_censored_4436.html
+#　分割得到xaa xab xac三个文件
+split_a_jcensored_dict ={'html_path':'/home/curie/javhoo/censored/xaa','sqlite3db_path':'/home/curie/javhooDB.db'}
+split_b_jcensored_dict ={'html_path':'/home/curie/javhoo/censored/xab','sqlite3db_path':'/home/curie/javhooDB.db'}
+split_c_jcensored_dict ={'html_path':'/home/curie/javhoo/censored/xac','sqlite3db_path':'/home/curie/javhooDB.db'}
 class JavHoo_Uncensored():
     censored_total = 0
     process_num_at_a_time = 1
@@ -58,6 +66,7 @@ class JavHoo_Uncensored():
             sql_insert = sql_insert[:-1]
             try:
                 cursor.executemany(sql_insert,data)
+                # conn.commit()
                 print(av_index)
             except BaseException as e:
                 conn.rollback()
@@ -84,7 +93,7 @@ class JavHoo_Uncensored():
     def get_cfanhao(self,article):
         return article.a['href'].replace('https://www.javhoo.com/av/','')
     def get_ctitle(self,article):
-        return article.a['title']
+        return article.a.get('title')
     def get_uImgurl(self,article):
         # return article.select('img[class="iso-lazy-load preload-me"]')[0]['data-src']
         result_list = article.select('img[class="iso-lazy-load preload-me"]')
@@ -112,7 +121,7 @@ class JavHoo_Uncensored():
         pass
     def drop_table(self):
         sql_drop = '''
-        drop table censored;
+        drop table if exists censored;
         '''
         try:
             conn = sqlite3.connect(self.dbpath)
@@ -143,11 +152,26 @@ class JavHoo_Uncensored():
         pass
     def insert(self,cursor,sql_insert,dict_data):
         cursor.execute(sql_insert,tuple(dict_data.values()))
-        pass    
-if __name__ == '__main__':
+        pass
+def process_split(jcensored_dict,is_drop,is_creat):
     print("Reading ",jcensored_dict['html_path'],"...")
     censored  =  JavHoo_Uncensored(jcensored_dict)
-    censored.drop_table()
-    censored.create_table()
+    if(is_drop):
+        censored.drop_table()
+    if(is_creat):
+        censored.create_table()
     censored.process_all()
     print("see ",jcensored_dict['sqlite3db_path'])
+    return    
+if __name__ == '__main__':
+    # print("Reading ",jcensored_dict['html_path'],"...")
+    # censored  =  JavHoo_Uncensored(jcensored_dict)
+    # censored.drop_table()
+    # censored.create_table()
+    # censored.process_all()
+    # print("see ",jcensored_dict['sqlite3db_path'])
+    # 内容过多，切分处理
+    process_split(split_a_jcensored_dict,True,True)
+    process_split(split_b_jcensored_dict,False,False)
+    process_split(split_c_jcensored_dict,False,False)
+

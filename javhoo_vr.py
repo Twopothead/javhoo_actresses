@@ -5,8 +5,8 @@ import re
 import json
 import sqlite3
 jvr_dict ={
-'html_path':'/home/curie/0py/sample_vr.html',
-'sqlite3db_path':'/home/curie/vr.db'
+'html_path':'/home/curie/javhoo/javhoo/javhoo_vr_226.html',
+'sqlite3db_path':'/home/curie/javhooDB.db'
 }
 class JavHoo_Uncensored():
     vr_total = 0
@@ -112,7 +112,7 @@ class JavHoo_Uncensored():
         pass
     def drop_table(self):
         sql_drop = '''
-        drop table vr;
+        drop table if exists vr;
         '''
         try:
             conn = sqlite3.connect(self.dbpath)

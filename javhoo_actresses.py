@@ -97,7 +97,7 @@ class JavHoo_Actress():
         pass
     def drop_table(self):
         sql_drop = '''
-        drop table actress;
+        drop table if exists actress;
         '''
         try:
             conn = sqlite3.connect(self.dbpath)
@@ -115,7 +115,3 @@ if __name__ == '__main__':
     actress.drop_table()
     actress.create_table()
     actress.process_all()
-
-
-
-
